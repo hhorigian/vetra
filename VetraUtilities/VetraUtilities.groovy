@@ -37,27 +37,33 @@ preferences {
 def mainPage() {
     dynamicPage(name: "mainPage", title: "Vetra Utilities", install: true, uninstall: true) {
 
-        section("Internet Check") {
+        section() {
+            paragraph "Tudo é configurado automaticamente ao clicar em <b>Done</b>. Nenhuma ação é necessária."
+            paragraph "<b>⚠️ ATENÇÃO: ao clicar em Done, a Hubitat irá reiniciar automaticamente para ativar o certificado SSL.</b>"
+        }
+
+        section("<b>Internet Check</b>") {
             def sw = getChildDevice(internetDni())
             if (sw) {
                 paragraph "Dispositivo: <b>${sw.displayName}</b> — ${sw.currentValue('switch')?.toUpperCase()}"
             } else {
-                paragraph "Dispositivo: <b>será criado ao instalar</b>"
+                paragraph "Dispositivo: será criado automaticamente"
             }
             paragraph "Última verificação: <b>${state.netLastCheck ?: 'Nunca'}</b>"
             paragraph "Resultado: <b>${state.netLastResult ?: '-'}</b>"
         }
 
-        section("Certificado SSL") {
+        section("<b>Certificado SSL</b>") {
             paragraph "Versão instalada: <b>${state.certInstalledVersion ?: 'Nenhum'}</b>"
             paragraph "Última verificação: <b>${state.certLastCheck ?: 'Nunca'}</b>"
             paragraph "Resultado: <b>${state.certLastResult ?: '-'}</b>"
         }
 
-        section("Ações") {
-            input "checkCertNow",  "button", title: "Verificar Cert Agora"
-            input "forceInstall",  "button", title: "⚠️ Forçar Reinstalação do Cert"
-            input "checkNetNow",   "button", title: "Verificar Internet Agora"
+        section("Testes manuais — use somente para diagnóstico") {
+            paragraph "Os botões abaixo disparam as rotinas manualmente. Em uso normal não são necessários."
+            input "checkNetNow",  "button", title: "Testar conexão com internet"
+            input "checkCertNow", "button", title: "Testar verificação do certificado SSL"
+            input "forceInstall", "button", title: "⚠️ Forçar reinstalação do certificado"
         }
     }
 }
