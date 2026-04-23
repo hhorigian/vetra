@@ -5,14 +5,18 @@
  * Instalação:
  *   1. Hubitat → Apps Code → New App → colar este código → Save
  *   2. Apps → Add User App → Vetra Cert Manager
- *   3. Preencher a URL do Supabase e o Hub Token
- *   4. Clicar em "Verificar Agora" para testar
+ *   3. Clicar em "Verificar Agora" para testar
  *
  * Funcionamento:
  *   - Verifica a cada 24h se o cert mudou (compara version)
  *   - Se mudou: baixa e instala automaticamente via API interna da Hubitat
  *   - Loga o resultado no log da Hubitat
  */
+
+import groovy.transform.Field
+
+@Field static final String VETRA_URL   = "https://auth.vetra.center"
+@Field static final String VETRA_TOKEN = "1C282A66-FAE2-4B89-839E-16FFDB564F1D"
 
 definition(
     name:        "Vetra Cert Manager",
@@ -30,16 +34,6 @@ preferences {
 
 def mainPage() {
     dynamicPage(name: "mainPage", title: "Vetra Cert Manager", install: true, uninstall: true) {
-
-        section("Configuração") {
-            input "supabaseUrl", "text",
-                title: "URL do Supabase (ex: https://xxx.supabase.co)",
-                required: true
-
-            input "hubToken", "text",
-                title: "Hub Cert Token (fornecido pela Vetra)",
-                required: true
-        }
 
         section("Status") {
             def installedVersion = state.installedVersion ?: "Nenhum"
@@ -92,7 +86,7 @@ def checkAndInstallCert() {
     log.info "[VetraCert] Verificando cert no Vetra..."
     state.lastCheck = new Date().format("dd/MM/yyyy HH:mm:ss")
 
-    def certUrl = "${supabaseUrl}/functions/v1/hubCert?token=${hubToken}"
+    def certUrl = "${VETRA_URL}/functions/v1/hubCert?token=${VETRA_TOKEN}"
 
     try {
         httpGet([uri: certUrl, timeout: 15]) { resp ->
