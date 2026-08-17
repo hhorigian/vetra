@@ -218,8 +218,11 @@ def installCert(String cert, String key, String version) {
 
     try {
         httpPost([
-            uri:             "http://localhost:8080/hub/advanced/certificate/save",
-            body:            [certificate: cert, privateKey: key],
+            uri:             "http://127.0.0.1:8080/hub/advanced/certificate/saveJson",
+            body:            [
+                certificate: cert,
+                privateKey:  key
+            ],
             contentType:     "application/x-www-form-urlencoded",
             timeout:         30,
             followRedirects: false
@@ -237,6 +240,12 @@ def installCert(String cert, String key, String version) {
                 state.certLastResult = msg
             }
         }
+    } catch (groovyx.net.http.HttpResponseException e) {
+        def allow    = e.response?.headers?.'Allow'
+        def bodyText = e.response?.data?.toString()
+        def msg = "Erro ao instalar cert: HTTP ${e.statusCode} — Allow: ${allow} — Body: ${bodyText}"
+        log.error "[Vetra/Cert] ${msg}"
+        state.certLastResult = "Falha ao instalar: HTTP ${e.statusCode}"
     } catch (Exception e) {
         def msg = "Erro ao instalar cert: ${e.message}"
         log.error "[Vetra/Cert] ${msg}"
@@ -246,7 +255,7 @@ def installCert(String cert, String key, String version) {
 
 def rebootHub() {
     log.warn "[Vetra/Cert] Reiniciando hub para ativar novo cert SSL..."
-    httpPost([uri: "http://localhost:8080/hub/reboot", timeout: 10]) { resp ->
+    httpPost([uri: "http://127.0.0.1:8080/hub/reboot", timeout: 10]) { resp ->
         log.info "[Vetra/Cert] Reboot solicitado: HTTP ${resp.status}"
     }
 }
